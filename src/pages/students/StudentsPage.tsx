@@ -11,7 +11,10 @@ import {
   MessageSquare, 
   UserPlus,
   ShieldCheck,
-  Building2
+  Building2,
+  Users,
+  UserSquare2,
+  Link as LinkIcon
 } from "lucide-react";
 import { CoinBadge } from "@/src/components/common/CoinBadge";
 import { PointsBadge } from "@/src/components/common/PointsBadge";
@@ -31,11 +34,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function StudentsPage() {
-  const [students, setStudents] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("students");
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -45,15 +51,15 @@ export default function StudentsPage() {
     parentId: "",
   });
 
-  const loadStudents = async () => {
+  const loadData = async () => {
     setLoading(true);
     const u = await api.getUsers();
-    setStudents(u.filter((s: any) => s.role === 'student'));
+    setUsers(u || []);
     setLoading(false);
   };
 
   useEffect(() => {
-    loadStudents();
+    loadData();
   }, []);
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -61,22 +67,30 @@ export default function StudentsPage() {
     try {
       await api.createUser(formData);
       setIsDialogOpen(false);
-      setFormData({ name: "", email: "", password: "password123", role: "student", studentType: "independent", parentId: "" });
-      loadStudents();
+      setFormData({ name: "", email: "", password: "password123", role: formData.role, studentType: "independent", parentId: "" });
+      loadData();
     } catch (err) {
       console.error(err);
     }
   };
 
-  const columns = [
+  const students = users.filter((u: any) => u.role === 'student');
+  const parents = users.filter((u: any) => u.role === 'parent');
+
+  const studentColumns = [
     { key: "name", label: "Student", render: (v: string, row: any) => (
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-surface-3 flex items-center justify-center font-display font-bold text-navy">
-          {v.charAt(0)}
+          {v?.charAt(0) || 'S'}
         </div>
         <div>
           <p className="font-bold text-navy">{v}</p>
-          <p className="text-[10px] text-text-muted uppercase tracking-wider font-bold">{row.studentType}</p>
+          <div className="flex gap-2">
+             <p className="text-[10px] text-text-muted uppercase tracking-wider font-bold">{row.studentType}</p>
+             {row.parentId && (
+               <p className="text-[10px] text-baby uppercase tracking-wider font-bold">• Linked to Parent</p>
+             )}
+          </div>
         </div>
       </div>
     )},
@@ -87,38 +101,66 @@ export default function StudentsPage() {
         <PointsBadge points={row.points} className="text-xs" />
       </div>
     )},
-    { key: "createdAt", label: "Joined On", render: (v: string) => new Date(v).toLocaleDateString() },
     { key: "actions", label: "", render: (_: any, row: any) => (
       <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" title="Link to Parent"><LinkIcon className="w-4 h-4 text-text-secondary" /></Button>
         <Button variant="ghost" size="icon" title="Email Student"><Mail className="w-4 h-4 text-text-secondary" /></Button>
-        <Button variant="ghost" size="icon" title="WhatsApp Parent"><MessageSquare className="w-4 h-4 text-text-secondary" /></Button>
       </div>
     )}
   ];
 
-  if (loading) return <div>Loading students...</div>;
+  const parentColumns = [
+    { key: "name", label: "Parent", render: (v: string) => (
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-navy/10 flex items-center justify-center font-display font-bold text-navy">
+          {v?.charAt(0) || 'P'}
+        </div>
+        <p className="font-bold text-navy">{v}</p>
+      </div>
+    )},
+    { key: "email", label: "Email" },
+    { key: "coinBalance", label: "Family Balance", render: (v: number) => <CoinBadge amount={v} /> },
+    { key: "id", label: "Children", render: (id: string) => (
+      <span className="text-xs font-bold text-text-muted uppercase">
+        {students.filter(s => s.parentId === id).length} Linked
+      </span>
+    )},
+    { key: "actions", label: "", render: () => (
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon"><MessageSquare className="w-4 h-4 text-text-secondary" /></Button>
+        <Button variant="ghost" size="icon"><Mail className="w-4 h-4 text-text-secondary" /></Button>
+      </div>
+    )}
+  ];
+
+  if (loading) return (
+    <div className="p-12 text-center text-text-muted animate-pulse">
+      <Users className="w-10 h-10 mx-auto mb-4 opacity-10" />
+      <p className="font-bold uppercase tracking-widest text-xs">Loading directory...</p>
+    </div>
+  );
 
   return (
     <div className="space-y-8">
       <PageHeader 
-        title="Student Directory" 
-        subtitle="View and manage all students enrolled in the platform."
+        title="People & Profiles" 
+        subtitle="Manage students, parents, and administrative accounts."
         actions={
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger render={
               <Button className="bg-baby text-navy hover:bg-baby-dark font-bold rounded-xl px-6 outline-none">
                 <Plus className="w-4 h-4 mr-2" />
-                Enrol Student
+                Add New User
               </Button>
             } />
-            <DialogContent className="sm:max-w-md border-surface-3 bg-white p-0 overflow-hidden rounded-[2rem]">
+            <DialogContent className="sm:max-w-md border-surface-3 bg-white p-0 overflow-hidden rounded-[2.5rem]">
               <DialogHeader className="p-8 bg-surface-2 border-b border-surface-3">
                 <div className="w-12 h-12 bg-baby/20 rounded-2xl flex items-center justify-center mb-4">
                   <UserPlus className="w-6 h-6 text-baby" />
                 </div>
-                <DialogTitle className="text-2xl font-display font-bold text-navy">Enrol New Student</DialogTitle>
+                <DialogTitle className="text-2xl font-display font-bold text-navy">Create Account</DialogTitle>
                 <DialogDescription className="text-text-secondary font-medium">
-                  Create a student account. If they are a minor, ensure they are linked to a parent.
+                  Provision a new student or parent account.
                 </DialogDescription>
               </DialogHeader>
               
@@ -140,7 +182,7 @@ export default function StudentsPage() {
                     <Input 
                       type="email"
                       required 
-                      placeholder="student@example.com"
+                      placeholder="user@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
                       className="h-12 rounded-xl bg-surface-2 border-surface-3 transition-all focus:bg-white focus:ring-baby"
@@ -149,31 +191,53 @@ export default function StudentsPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted ml-1">Student Type</label>
-                      <Select required onValueChange={(val) => setFormData({...formData, studentType: val})}>
+                       <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted ml-1">Account Role</label>
+                       <Select required value={formData.role} onValueChange={(val) => setFormData({...formData, role: val})}>
                         <SelectTrigger className="h-12 rounded-xl bg-surface-2 border-surface-3 outline-none">
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder="Select role" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border-surface-3">
-                          <SelectItem value="child">Child (has parent)</SelectItem>
-                          <SelectItem value="independent">Independent</SelectItem>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="parent">Parent</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted ml-1">Password</label>
-                      <Input 
-                        disabled
-                        value="password123"
-                        className="h-12 rounded-xl bg-surface-3 border-transparent text-text-muted opacity-50 cursor-not-allowed"
-                      />
-                    </div>
+                    {formData.role === 'student' && (
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted ml-1">Student Type</label>
+                        <Select required value={formData.studentType} onValueChange={(val) => setFormData({...formData, studentType: val})}>
+                          <SelectTrigger className="h-12 rounded-xl bg-surface-2 border-surface-3 outline-none">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-surface-3">
+                            <SelectItem value="child">Child Profile</SelectItem>
+                            <SelectItem value="independent">Independent</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
+
+                  {formData.role === 'student' && formData.studentType === 'child' && (
+                     <div className="space-y-2">
+                       <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted ml-1">Link to Parent</label>
+                       <Select value={formData.parentId} onValueChange={(val) => setFormData({...formData, parentId: val})}>
+                        <SelectTrigger className="h-12 rounded-xl bg-surface-2 border-surface-3 outline-none">
+                          <SelectValue placeholder="Select parent (optional)" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-surface-3">
+                          {parents.map(p => (
+                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
 
                   <div className="p-4 bg-teal/5 border border-teal/10 rounded-2xl flex items-start gap-3">
                     <ShieldCheck className="w-5 h-5 text-teal mt-0.5" />
                     <p className="text-[10px] text-teal-700 font-medium leading-relaxed">
-                      Secured Account: Credentials will be sent to the student's email. They can change their password on first login.
+                      Secured Account: Credentials will be sent to the user's email.
                     </p>
                   </div>
                 </div>
@@ -192,7 +256,28 @@ export default function StudentsPage() {
         }
       />
 
-      <DataTable columns={columns} data={students} />
+      <Tabs defaultValue="students" onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="bg-surface-2 p-1 rounded-xl w-full sm:w-auto h-auto">
+          <TabsTrigger value="students" className="rounded-lg px-8 py-2.5 data-[state=active]:bg-white data-[state=active]:text-navy data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest">
+            <UserSquare2 className="w-4 h-4 mr-2" /> Students ({students.length})
+          </TabsTrigger>
+          <TabsTrigger value="parents" className="rounded-lg px-8 py-2.5 data-[state=active]:bg-white data-[state=active]:text-navy data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest">
+            <Users className="w-4 h-4 mr-2" /> Parents ({parents.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="students" className="animate-in fade-in duration-300">
+           <div className="card p-0 overflow-hidden border-surface-3 shadow-xl shadow-navy/5">
+              <DataTable columns={studentColumns} data={students} />
+           </div>
+        </TabsContent>
+        
+        <TabsContent value="parents" className="animate-in fade-in duration-300">
+           <div className="card p-0 overflow-hidden border-surface-3 shadow-xl shadow-navy/5">
+              <DataTable columns={parentColumns} data={parents} />
+           </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

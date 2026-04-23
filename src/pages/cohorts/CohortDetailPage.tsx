@@ -35,10 +35,10 @@ export default function CohortDetailPage() {
   useEffect(() => {
     async function load() {
       if (!id) return;
-      const c = await api.getCohortById(id);
+      const c: any = await api.getCohortById(id);
       if (c) {
         setCohort(c);
-        const l = await api.getLessonsByCourseId(c.courseId);
+        const l: any = await api.getLessonsByCourseId(c.courseId);
         // Pacing Filter: Only show lessons up to currentWeek (for students)
         if (user?.role === ROLES.STUDENT) {
             setLessons(l.filter((lesson: any) => lesson.week <= (c.currentWeek || 1)));

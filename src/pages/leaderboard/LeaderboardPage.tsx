@@ -10,10 +10,17 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     async function load() {
-      // Mock leaderboard for c1
-      const l = await api.getLeaderboardByCohortId('c1');
-      setBoard(l);
-      setLoading(false);
+      try {
+        const cohorts = await api.getCohorts();
+        if (cohorts && cohorts.length > 0) {
+          const l = await api.getLeaderboardByCohortId(cohorts[0].id);
+          setBoard(l || []);
+        }
+      } catch (err) {
+        console.error("Leaderboard load failed", err);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);

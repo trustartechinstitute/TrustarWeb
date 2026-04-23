@@ -67,7 +67,7 @@ export default function DashboardPage() {
       <div className="space-y-8">
         <PageHeader 
           title="Overview" 
-          subtitle={`Welcome back, ${user.name.split(' ')[0]}! Here's what's happening today.`}
+          subtitle={`Welcome back, ${(user?.name || 'Admin').split(' ')[0]}! Here's what's happening today.`}
           actions={
             <Button onClick={() => navigate("/app/leads")} className="bg-baby text-navy hover:bg-baby-dark font-bold rounded-xl px-6">
               View All Leads
@@ -128,7 +128,7 @@ export default function DashboardPage() {
       <div className="space-y-8">
         <PageHeader 
           title="My Learning" 
-          subtitle={`Keep building, ${user.name.split(' ')[0]}! You have 1 session today.`}
+          subtitle={`Keep building, ${(user?.name || 'Student').split(' ')[0]}! You have 1 session today.`}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -282,7 +282,7 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-12 h-12 rounded-full bg-surface-3 flex items-center justify-center font-display font-bold text-navy text-xl group-hover:bg-baby transition-colors">
-                      {child.name.charAt(0)}
+                      {(child.name || 'C').charAt(0)}
                     </div>
                     <div>
                       <h4 className="font-display font-bold text-navy">{child.name}</h4>

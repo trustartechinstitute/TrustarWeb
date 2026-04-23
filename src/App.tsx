@@ -24,6 +24,7 @@ import LeaderboardPage from "./pages/leaderboard/LeaderboardPage";
 import WalletPage from "./pages/wallet/WalletPage";
 import OrganizationsPage from "./pages/organizations/OrganizationsPage";
 import SettingsPage from "./pages/settings/SettingsPage";
+import SubmissionsPage from "./pages/submissions/SubmissionsPage";
 
 // Admin / Dashboard
 // Placeholder removed as real components are imported above
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="cohorts/:id" element={<CohortDetailPage />} />
             <Route path="cohorts/:id/lesson/:lessonId" element={<LessonPage />} />
             <Route path="students" element={<ProtectedRoute role="admin"><StudentsPage /></ProtectedRoute>} />
+            <Route path="submissions" element={<ProtectedRoute role="admin"><SubmissionsPage /></ProtectedRoute>} />
             <Route path="resources" element={<ResourcesPage />} />
             <Route path="leaderboard" element={<LeaderboardPage />} />
             <Route path="wallet" element={<WalletPage />} />

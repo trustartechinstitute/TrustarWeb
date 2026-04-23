@@ -1,30 +1,67 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { CheckCircle2, ExternalLink, Send, FileCheck } from "lucide-react";
+import { CheckCircle2, Send, FileCheck, Loader2 } from "lucide-react";
 import { api } from "@/src/services/api";
 
 export default function LessonAssignment({ lesson, studentId }: { lesson: any; studentId: string }) {
+  const { id: cohortId } = useParams();
   const [content, setContent] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [existingSubmission, setExistingSubmission] = useState<any>(null);
+  const [fetching, setFetching] = useState(true);
+
+  useEffect(() => {
+    async function checkExisting() {
+      if (!studentId || !lesson.id) return;
+      try {
+        const subs: any[] = await api.getSubmissionsByStudentId(studentId);
+        const match = subs.find((s: any) => s.lessonId === lesson.id);
+        if (match) {
+          setExistingSubmission(match);
+          setSubmitted(true);
+          setContent(match.content);
+        }
+      } catch (err) {
+        console.error("Error checking submissions:", err);
+      } finally {
+        setFetching(false);
+      }
+    }
+    checkExisting();
+  }, [studentId, lesson.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!content.trim()) return;
+    
     setLoading(true);
     try {
-      await api.createLead({ // Mock submission logic - reuse lead for now or just push to submissions
-        // Real api should have submitAssignment
+      await api.submitAssignment({
+        studentId,
+        cohortId,
+        lessonId: lesson.id,
+        lessonTitle: lesson.title,
+        content: content.trim(),
       });
       setSubmitted(true);
     } catch (err) {
       console.error(err);
+      alert("Submission failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  if (fetching) return (
+    <div className="py-20 text-center flex flex-col items-center gap-4">
+      <Loader2 className="w-8 h-8 text-baby animate-spin" />
+      <p className="text-xs font-bold text-text-muted uppercase tracking-widest">Checking status...</p>
+    </div>
+  );
 
   return (
     <div className="py-6">
@@ -54,7 +91,7 @@ export default function LessonAssignment({ lesson, studentId }: { lesson: any; s
             </div>
             <Button 
               type="submit" 
-              disabled={loading || !content}
+              disabled={loading || !content.trim()}
               className="bg-navy text-white hover:bg-navy2 font-bold rounded-full px-12 h-14 w-full sm:w-auto"
             >
               {loading ? "Submitting..." : "Submit Assignment"}
@@ -71,12 +108,25 @@ export default function LessonAssignment({ lesson, studentId }: { lesson: any; s
           <p className="text-text-secondary font-medium leading-relaxed mb-8">
             Your assignment has been sent for grading. You've earned <span className="text-baby font-bold">15 points</span> for submitting!
           </p>
+          
+          {existingSubmission?.instructorFeedback && (
+            <div className="mb-6 p-6 bg-baby/10 border border-baby/20 rounded-2xl text-left">
+              <p className="text-[10px] font-bold text-baby uppercase tracking-widest mb-2">Instructor Feedback</p>
+              <p className="text-sm font-medium text-navy italic">"{existingSubmission.instructorFeedback}"</p>
+              <div className="mt-4 pt-4 border-t border-baby/10 flex justify-between">
+                <span className="text-xs font-bold text-text-muted uppercase">Points Awarded</span>
+                <span className="text-sm font-bold text-baby">+{existingSubmission.pointsAwarded} pts</span>
+              </div>
+            </div>
+          )}
+
           <div className="p-4 bg-white rounded-2xl border border-surface-3 text-left">
             <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Your Submission</p>
-            <p className="text-sm font-medium text-navy line-clamp-2">{content}</p>
+            <p className="text-sm font-medium text-navy line-clamp-3">{content}</p>
           </div>
+          
           <Button variant="ghost" className="mt-8 text-baby font-bold hover:bg-baby/5" onClick={() => setSubmitted(false)}>
-            Edit Submission
+            {existingSubmission?.status === 'approved' ? "View Submission" : "Edit Submission"}
           </Button>
         </div>
       )}

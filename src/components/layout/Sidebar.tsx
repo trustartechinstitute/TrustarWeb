@@ -12,7 +12,8 @@ import {
   Building2, 
   Settings,
   X,
-  LogOut
+  LogOut,
+  FileCheck
 } from "lucide-react";
 import { useAuth } from "@/src/hooks/useAuth";
 import { ROLES } from "@/src/utils/constants";
@@ -32,6 +33,7 @@ export default function Sidebar({ onClose, className = "" }: SidebarProps) {
       { label: "Dashboard", icon: LayoutDashboard, path: "/app/dashboard" },
       { label: "Tracks", icon: Map, path: "/app/tracks" },
       { label: "Cohorts", icon: Users, path: "/app/cohorts" },
+      { label: "Submissions", icon: FileCheck, path: "/app/submissions" },
       { label: "Students", icon: UserSquare2, path: "/app/students" },
       { label: "Leads", icon: ClipboardList, path: "/app/leads" },
       { label: "Resources", icon: Library, path: "/app/resources" },
