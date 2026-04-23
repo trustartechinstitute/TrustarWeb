@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  --color-baby: #7EB8F7;
+  --color-baby-dark: #5BBCE4;
+  --color-navy: #060F2E;
+  --color-navy2: #0D1F52;
+  --color-gold: #F5B400;
+  --color-teal: #0EC4C4;
+  --color-green: #0EC47A;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F4F7FF;
+  --color-surface-3: #E8EDF8;
+  --color-text-primary: #1A1F36;
+  --color-text-secondary: #5A6480;
+  --color-text-muted: #9BA3BF;
+
+  --font-display: "Syne", sans-serif;
+  --font-body: "DM Sans", sans-serif;
+  --font-sans: "DM Sans", sans-serif;
+
+  --radius-xl: 0.75rem;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-text-primary font-body;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface-2 border border-surface-3 rounded-xl;
+  }
+}
