@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Breadcrumbs } from "../common/Breadcrumbs";
 
 export default function AppLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function AppLayout() {
         <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
         <main className="flex-1 p-4 md:p-8 lg:p-10 w-full min-w-0">
           <div className="max-w-7xl mx-auto w-full">
+            <Breadcrumbs />
             <Outlet />
           </div>
         </main>

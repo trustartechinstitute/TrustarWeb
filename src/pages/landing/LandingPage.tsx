@@ -143,7 +143,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <main className="min-w-0 w-full overflow-hidden">
+      <main className="min-w-0 w-full overflow-x-hidden">
         {/* 2. Hero */}
         <section className="pt-32 lg:pt-52 pb-20 px-4 sm:px-6 overflow-hidden">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -423,7 +423,7 @@ export default function LandingPage() {
         </section>
 
         {/* 11. Lead capture form */}
-        <section id="leads" className="py-24 sm:py-32 px-4 sm:px-6 bg-white overflow-hidden">
+        <section id="leads" className="py-24 sm:py-32 px-4 sm:px-6 bg-white">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="text-center lg:text-left">
               <h2 className="text-4xl sm:text-6xl font-display font-bold text-navy mb-8 tracking-tighter leading-none uppercase">Join the <br /><span className="text-baby">Tribe</span>.</h2>

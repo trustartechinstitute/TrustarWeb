@@ -1,406 +1,190 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  setDoc, 
-  addDoc, 
-  updateDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit,
-  Timestamp 
-} from 'firebase/firestore';
-import { db, auth } from '../lib/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: 'create' | 'update' | 'delete' | 'list' | 'get' | 'write';
-  path: string | null;
-  authInfo: {
-    userId: string;
-    email: string;
-    emailVerified: boolean;
-    isAnonymous: boolean;
-    providerInfo: { providerId: string; displayName: string; email: string; }[];
-  }
-}
-
-function handleFirestoreError(error: any, operationType: FirestoreErrorInfo['operationType'], path: string | null = null) {
-  const authUser = auth.currentUser;
-  const errorInfo: FirestoreErrorInfo = {
-    error: error.message || String(error),
-    operationType,
-    path,
-    authInfo: {
-      userId: authUser?.uid || 'anonymous',
-      email: authUser?.email || 'none',
-      emailVerified: authUser?.emailVerified || false,
-      isAnonymous: authUser?.isAnonymous || true,
-      providerInfo: authUser?.providerData.map(p => ({
-        providerId: p.providerId,
-        displayName: p.displayName || '',
-        email: p.email || ''
-      })) || []
-    }
-  };
-  console.error("Firestore Error:", errorInfo);
-  throw new Error(JSON.stringify(errorInfo));
-}
+/**
+ * API SERVICE BOILERPLATE
+ * ----------------------
+ * This file contains the data fetching logic for the application.
+ * Currently, it returns mock data to allow the UI to function.
+ * 
+ * To implement your own backend:
+ * 1. Replace the async returns with actual fetch() or axios calls.
+ * 2. Update the data types to match your backend schema.
+ */
 
 export const api = {
-  // Users
+  // --- USERS & DIRECTORY ---
   getUsers: async () => {
-    try {
-      const snap = await getDocs(collection(db, 'users'));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'users'); }
+    return [
+      { id: '1', name: 'Alex Johnson', email: 'alex@example.com', role: 'student', points: 450, coinBalance: 1200, studentType: 'independent' },
+      { id: '2', name: 'Sarah Smith', email: 'sarah@example.com', role: 'student', points: 380, coinBalance: 850, studentType: 'child', parentId: 'p1' },
+      { id: 'p1', name: 'James Smith', email: 'james@example.com', role: 'parent', coinBalance: 2500 }
+    ];
   },
 
   checkProfileExists: async (email: string) => {
-    try {
-      const q = query(collection(db, 'users'), where('email', '==', email.toLowerCase()));
-      const snap = await getDocs(q);
-      if (snap.empty) return null;
-      return { id: snap.docs[0].id, ...snap.docs[0].data() };
-    } catch (e) { handleFirestoreError(e, 'get', 'users'); }
+    return { id: 'mock_user', name: 'Invited User', email, role: 'student' };
   },
 
   getUserById: async (id: string) => {
-    try {
-      const snap = await getDoc(doc(db, 'users', id));
-      if (!snap.exists()) throw new Error('User not found');
-      return { id: snap.id, ...snap.data() };
-    } catch (e) { handleFirestoreError(e, 'get', `users/${id}`); }
-  },
-
-  getChildrenByParentId: async (parentId: string) => {
-    try {
-      const q = query(collection(db, 'users'), where('parentId', '==', parentId));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'users'); }
+    return { id, name: 'Sample User', email: 'user@example.com', role: 'student', points: 100 };
   },
 
   createUser: async (userData: any) => {
-    try {
-      // In a real production app, you might use a Firebase Cloud Function for this 
-      // to avoid signing out the admin. For AI Studio, we'll assume the admin is adding manually.
-      // Note: If adding a real student account, we'd need to handle auth carefully.
-      const res = await addDoc(collection(db, 'users'), {
-        ...userData,
-        points: userData.points || 0,
-        coinBalance: userData.coinBalance || 0,
-        createdAt: Timestamp.now()
-      });
-      return { id: res.id, ...userData };
-    } catch (e) { handleFirestoreError(e, 'create', 'users'); }
+    console.log("Create user API call:", userData);
+    return { id: Math.random().toString(), ...userData };
   },
 
-  // Tracks
+  getChildrenByParentId: async (parentId: string) => {
+    return [{ id: 'child1', name: 'Junior User', parentId, role: 'student', points: 50 }];
+  },
+
+  // --- TRACKS & COURSES ---
   getTracks: async () => {
-    try {
-      const snap = await getDocs(collection(db, 'tracks'));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'tracks'); }
+    return [
+      { id: 't1', title: 'Foundations', description: 'Beginner basics for young innovators.', level: 'Level 1' },
+      { id: 't2', title: 'Exploration', description: 'Intermediate web and logic skills.', level: 'Level 2' }
+    ];
   },
 
   getTrackById: async (id: string) => {
-    try {
-      const snap = await getDoc(doc(db, 'tracks', id));
-      return snap.exists() ? { id: snap.id, ...snap.data() } : null;
-    } catch (e) { handleFirestoreError(e, 'get', `tracks/${id}`); }
+    return { id, title: 'Foundations', description: 'Beginner basics' };
   },
 
-  // Courses
   getCourses: async () => {
-    try {
-      const snap = await getDocs(collection(db, 'courses'));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'courses'); }
+    return [
+      { id: 'c1', title: 'Digital Explorers', description: 'Intro to digital tools', durationWeeks: 12 }
+    ];
   },
 
   getCourseById: async (id: string) => {
-    try {
-      const snap = await getDoc(doc(db, 'courses', id));
-      return snap.exists() ? { id: snap.id, ...snap.data() } : null;
-    } catch (e) { handleFirestoreError(e, 'get', `courses/${id}`); }
+    return { id, title: 'Digital Explorers', description: 'Intro to digital tools' };
   },
 
   getCoursesByTrackId: async (trackId: string) => {
-    try {
-      const q = query(collection(db, 'courses'), where('trackId', '==', trackId));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'courses'); }
+    return [
+      { id: 'c1', trackId, title: 'Digital Explorers', description: 'Intro to digital tools', durationWeeks: 12 }
+    ];
   },
 
-  // Cohorts
+  // --- COHORTS & ENROLLMENTS ---
   getCohorts: async () => {
-    try {
-      const snap = await getDocs(collection(db, 'cohorts'));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'cohorts'); }
+    return [
+      { id: 'co1', name: 'Digital Explorers - Batch A', courseId: 'c1', status: 'active', startDate: '2024-05-01' }
+    ];
   },
 
   getCohortById: async (id: string) => {
-    try {
-      const snap = await getDoc(doc(db, 'cohorts', id));
-      return snap.exists() ? { id: snap.id, ...snap.data() } : null;
-    } catch (e) { handleFirestoreError(e, 'get', `cohorts/${id}`); }
+    return { 
+      id, 
+      name: 'Batch A', 
+      courseId: 'c1', 
+      status: 'active',
+      capacity: 12,
+      studentsCount: 8,
+      startDate: 'May 01, 2024',
+      endDate: 'Aug 15, 2024',
+      schedule: 'Saturdays at 10:00 AM (GMT)',
+      deliveryMode: 'online'
+    };
   },
 
-  // Enrollments
   getEnrollmentsByStudentId: async (studentId: string) => {
-    try {
-      const q = query(collection(db, 'enrollments'), where('studentId', '==', studentId));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'enrollments'); }
+    return [{ id: 'en1', studentId, courseId: 'c1', cohortId: 'co1', status: 'active' }];
   },
 
-  // Lessons - Master Course model
-  getLessonsByCourseId: async (courseId: string) => {
-    try {
-      const q = query(collection(db, 'lessons'), where('courseId', '==', courseId), orderBy('week'), orderBy('session'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'lessons'); }
+  // --- LESSONS & CONTENT ---
+  getLessonsByCourseId: async (_courseId: string) => {
+    return [
+      { id: 'l1', title: 'Computer Confidence', week: 1, session: 1, status: 'published', contentBlocks: [{ type: 'text', content: '<h3>Welcome!</h3>' }] }
+    ];
   },
 
   getLessonById: async (id: string) => {
-    try {
-      const snap = await getDoc(doc(db, 'lessons', id));
-      return snap.exists() ? { id: snap.id, ...snap.data() } : null;
-    } catch (e) { handleFirestoreError(e, 'get', `lessons/${id}`); }
+    return { id, title: 'Computer Confidence', week: 1, session: 1, contentBlocks: [] };
   },
 
-  // Leads
-  getLeads: async () => {
-    try {
-      const q = query(collection(db, 'leads'), orderBy('status', 'desc'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'leads'); }
+  getQuizByLessonId: async (_lessonId: string) => {
+    return { id: 'q1', questions: [] };
   },
 
-  createLead: async (leadData: any) => {
-    try {
-      const res = await addDoc(collection(db, 'leads'), {
-        ...leadData,
-        status: leadData.status || 'new',
-        createdAt: Timestamp.now()
-      });
-      return { id: res.id, ...leadData };
-    } catch (e) { handleFirestoreError(e, 'create', 'leads'); }
-  },
-
-  updateLeadStatus: async (id: string, status: string) => {
-    try {
-      await updateDoc(doc(db, 'leads', id), { status });
-    } catch (e) { handleFirestoreError(e, 'update', `leads/${id}`); }
-  },
-
-  convertLeadToUser: async (leadId: string, cohortId: string) => {
-    try {
-      const leadSnap = await getDoc(doc(db, 'leads', leadId));
-      if (!leadSnap.exists()) throw new Error('Lead not found');
-      const lead = leadSnap.data();
-
-      const cohortSnap = await getDoc(doc(db, 'cohorts', cohortId));
-      if (!cohortSnap.exists()) throw new Error('Cohort not found');
-      const cohort = cohortSnap.data();
-
-      // Create profile in Firestore
-      const newUserRef = doc(collection(db, 'users'));
-      await setDoc(newUserRef, {
-        name: lead.name,
-        email: lead.email || `${lead.name.toLowerCase().replace(/\s+/g, '.')}@trustar.com`,
-        role: 'student',
-        studentType: lead.childAge ? 'child' : 'independent',
-        country: lead.country || null,
-        coinBalance: 0,
-        points: 0,
-        createdAt: Timestamp.now()
-      });
-
-      // Create enrollment
-      await addDoc(collection(db, 'enrollments'), {
-        studentId: newUserRef.id,
-        cohortId: cohortId,
-        courseId: cohort.courseId,
-        status: 'active',
-        enrolledAt: Timestamp.now()
-      });
-
-      // Update lead
-      await updateDoc(doc(db, 'leads', leadId), { status: 'enrolled' });
-
-      return { id: newUserRef.id, name: lead.name, role: 'student' };
-    } catch (e) { handleFirestoreError(e, 'write', 'conversion'); }
-  },
-
-  // Resources
-  getResources: async () => {
-    try {
-      const snap = await getDocs(collection(db, 'resources'));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'resources'); }
-  },
-
-  // Quizzes
-  getQuizByLessonId: async (lessonId: string) => {
-    try {
-      const q = query(collection(db, 'quizzes'), where('lessonId', '==', lessonId));
-      const snap = await getDocs(q);
-      return snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
-    } catch (e) { handleFirestoreError(e, 'get', 'quizzes'); }
-  },
-
-  // Discussion
-  getPostsByBoard: async (boardType: string, boardId: string) => {
-    try {
-      const q = query(
-        collection(db, 'discussionPosts'), 
-        where('boardType', '==', boardType), 
-        where('boardId', '==', boardId),
-        orderBy('isPinned', 'desc'),
-        orderBy('createdAt', 'desc')
-      );
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'discussionPosts'); }
-  },
-
-  createPost: async (postData: any) => {
-    try {
-      const res = await addDoc(collection(db, 'discussionPosts'), {
-        ...postData,
-        createdAt: Timestamp.now(),
-        replyCount: 0,
-        isPinned: false,
-        isResolved: false
-      });
-      return { id: res.id, ...postData };
-    } catch (e) { handleFirestoreError(e, 'create', 'discussionPosts'); }
-  },
-
-  // Leaderboard
-  getLeaderboardByCohortId: async (cohortId: string) => {
-    try {
-      // Basic implementation: get all enrollments and join with user points
-      const q = query(collection(db, 'enrollments'), where('cohortId', '==', cohortId));
-      const enrollSnap = await getDocs(q);
-      const leaderboard = [];
-      for (const edoc of enrollSnap.docs) {
-        const studentId = edoc.data().studentId;
-        const userSnap = await getDoc(doc(db, 'users', studentId));
-        if (userSnap.exists()) {
-          leaderboard.push({
-            studentId,
-            displayName: userSnap.data().name.split(' ')[0], // Simpler display
-            totalPoints: userSnap.data().points || 0
-          });
-        }
-      }
-      return leaderboard.sort((a, b) => b.totalPoints - a.totalPoints);
-    } catch (e) { handleFirestoreError(e, 'list', 'leaderboard'); }
-  },
-
-  // Wallet
-  getTransactionsByUserId: async (userId: string) => {
-    try {
-      const q = query(collection(db, 'coinTransactions'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'coinTransactions'); }
-  },
-
-  // Submissions
-  submitAssignment: async (submissionData: any) => {
-    try {
-      const res = await addDoc(collection(db, 'submissions'), {
-        ...submissionData,
-        status: 'pending',
-        pointsAwarded: 0,
-        createdAt: Timestamp.now()
-      });
-      
-      // Update student points (basic reward)
-      if (submissionData.studentId) {
-        const userRef = doc(db, 'users', submissionData.studentId);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const currentPoints = userSnap.data().points || 0;
-          await updateDoc(userRef, { points: currentPoints + 15 });
-        }
-      }
-
-      return { id: res.id, ...submissionData };
-    } catch (e) { handleFirestoreError(e, 'create', 'submissions'); }
+  // --- SUBMISSIONS ---
+  getAllSubmissions: async () => {
+    return [
+      { id: 's1', studentId: '1', lessonId: 'l1', lessonTitle: 'Computer Confidence', status: 'pending', content: 'My first project!', pointsAwarded: 0 }
+    ];
   },
 
   getSubmissionsByStudentId: async (studentId: string) => {
-    try {
-      const q = query(collection(db, 'submissions'), where('studentId', '==', studentId), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'submissions'); }
+    return [{ id: 's1', studentId, lessonId: 'l1', status: 'approved', pointsAwarded: 15 }];
   },
 
-  getSubmissionsByCohortId: async (cohortId: string) => {
-    try {
-      const q = query(collection(db, 'submissions'), where('cohortId', '==', cohortId), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'submissions'); }
+  submitAssignment: async (submission: any) => {
+    console.log("Submit assignment API call:", submission);
+    return { id: 'new_sub', ...submission };
   },
 
-  getAllSubmissions: async () => {
-    try {
-      const q = query(collection(db, 'submissions'), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'submissions'); }
+  gradeSubmission: async (id: string, status: string, points: number, feedback: string) => {
+    console.log("Grade submission API call:", id, status, points, feedback);
+    return true;
   },
 
-  gradeSubmission: async (submissionId: string, status: 'approved' | 'rejected', points: number, feedback: string) => {
-    try {
-      await updateDoc(doc(db, 'submissions', submissionId), {
-        status,
-        pointsAwarded: points,
-        instructorFeedback: feedback,
-        gradedAt: Timestamp.now()
-      });
-    } catch (e) { handleFirestoreError(e, 'update', `submissions/${submissionId}`); }
+  // --- LEADS & CRM ---
+  getLeads: async () => {
+    return [
+      { id: 'lead1', name: 'Mark Wilson', email: 'mark@test.com', phone: '+123456', status: 'new', createdAt: new Date().toISOString() }
+    ];
   },
 
-  // Organizations
+  createLead: async (leadData: any) => {
+    console.log("Create lead API call:", leadData);
+    return { id: 'new_lead', ...leadData };
+  },
+
+  updateLeadStatus: async (id: string, status: string) => {
+    console.log("Update lead status API call:", id, status);
+  },
+
+  convertLeadToUser: async (leadId: string, cohortId: string) => {
+    console.log("Convert lead API call:", leadId, cohortId);
+    return { id: 'new_user' };
+  },
+
+  // --- DISCUSSION ---
+  getPostsByBoard: async (type: string, id: string) => {
+    return [{ id: 'p1', boardType: type, boardId: id, authorName: 'System', content: 'Welcome to the board!', createdAt: new Date().toISOString() }];
+  },
+
+  createPost: async (postData: any) => {
+    console.log("Create post API call:", postData);
+    return { id: 'new_post', ...postData };
+  },
+
+  // --- ORGANIZATIONS ---
   getOrganizations: async () => {
-    try {
-      const snap = await getDocs(collection(db, 'organizations'));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { handleFirestoreError(e, 'list', 'organizations'); }
+    return [{ id: 'org1', name: 'Trustar Academy', location: 'London' }];
   },
 
-  // Dashboard stats
-  getDashboardStats: async () => {
-    try {
-      const uSnap = await getDocs(query(collection(db, 'users'), where('role', '==', 'student')));
-      const cSnap = await getDocs(collection(db, 'cohorts'));
-      const lSnap = await getDocs(collection(db, 'leads'));
-      const tSnap = await getDocs(collection(db, 'tracks'));
+  // --- RESOURCES ---
+  getResources: async () => {
+    return [{ id: 'res1', title: 'Toolbox', type: 'link', url: '#' }];
+  },
 
-      return {
-        totalStudents: uSnap.size,
-        totalCohorts: cSnap.size,
-        activeCohorts: cSnap.docs.filter(d => d.data().status === 'active').length,
-        totalLeads: lSnap.size,
-        newLeads: lSnap.docs.filter(d => d.data().status === 'new').length,
-        totalTracks: tSnap.size,
-      };
-    } catch (e) { handleFirestoreError(e, 'get', 'stats'); }
+  // --- WALLET & LEADERBOARD ---
+  getTransactionsByUserId: async (userId: string) => {
+    return [{ id: 'tx1', userId, amount: 100, type: 'reward', createdAt: new Date().toISOString() }];
+  },
+
+  getLeaderboardByCohortId: async (cohortId: string) => {
+    return [{ studentId: '1', displayName: 'Alex', totalPoints: 150 }];
+  },
+
+  // --- DASHBOARD & STATS ---
+  getDashboardStats: async () => {
+    return {
+      totalStudents: 124,
+      totalCohorts: 8,
+      activeCohorts: 6,
+      totalLeads: 45,
+      newLeads: 12,
+      totalTracks: 4
+    };
   }
 };

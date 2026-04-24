@@ -16,12 +16,31 @@ import {
   Zap, 
   Calendar,
   Wallet,
-  ArrowRight
+  ArrowRight,
+  TrendingUp
 } from "lucide-react";
+import { 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ROLES } from "@/src/utils/constants";
 import { formatDisplayName } from "@/src/utils/formatters";
+
+const MOCK_CHART_DATA = [
+  { name: 'Jan', students: 40 },
+  { name: 'Feb', students: 52 },
+  { name: 'Mar', students: 61 },
+  { name: 'Apr', students: 78 },
+  { name: 'May', students: 95 },
+  { name: 'Jun', students: 124 },
+];
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -83,12 +102,69 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-xl font-display font-bold text-navy flex items-center gap-2">
-              <ClipboardList className="w-5 h-5 text-baby" />
-              Recent Enquiries
-            </h3>
-            <DataTable 
+          <div className="lg:col-span-2 space-y-8">
+            {/* Chart Section */}
+            <div className="card p-8 bg-white overflow-hidden">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-xl font-display font-bold text-navy flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-baby" />
+                    Student Acquisition
+                  </h3>
+                  <p className="text-xs text-text-muted mt-1 font-medium">Growth across all tracks this year</p>
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal/10 text-teal-700 text-[10px] font-bold uppercase tracking-widest">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal"></span> Active
+                  </div>
+                </div>
+              </div>
+              
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={MOCK_CHART_DATA}>
+                    <defs>
+                      <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#89CFF0" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#89CFF0" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
+                      dy={10}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                      itemStyle={{ fontWeight: 'bold' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="students" 
+                      stroke="#89CFF0" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorStudents)" 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-xl font-display font-bold text-navy flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 text-baby" />
+                Recent Enquiries
+              </h3>
+              <DataTable 
               columns={[
                 { key: "name", label: "Name" },
                 { key: "country", label: "Country" },
@@ -99,6 +175,7 @@ export default function DashboardPage() {
               data={recentLeads}
             />
           </div>
+        </div>
           
           <div className="space-y-4">
             <h3 className="text-xl font-display font-bold text-navy flex items-center gap-2">

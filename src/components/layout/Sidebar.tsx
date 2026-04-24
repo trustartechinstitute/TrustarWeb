@@ -13,7 +13,8 @@ import {
   Settings,
   X,
   LogOut,
-  FileCheck
+  FileCheck,
+  Sparkles
 } from "lucide-react";
 import { useAuth } from "@/src/hooks/useAuth";
 import { ROLES } from "@/src/utils/constants";
@@ -33,9 +34,9 @@ export default function Sidebar({ onClose, className = "" }: SidebarProps) {
       { label: "Dashboard", icon: LayoutDashboard, path: "/app/dashboard" },
       { label: "Tracks", icon: Map, path: "/app/tracks" },
       { label: "Cohorts", icon: Users, path: "/app/cohorts" },
-      { label: "Submissions", icon: FileCheck, path: "/app/submissions" },
+      { label: "Submissions", icon: FileCheck, path: "/app/submissions", badge: "2" },
       { label: "Students", icon: UserSquare2, path: "/app/students" },
-      { label: "Leads", icon: ClipboardList, path: "/app/leads" },
+      { label: "Leads", icon: ClipboardList, path: "/app/leads", badge: "Hot" },
       { label: "Resources", icon: Library, path: "/app/resources" },
       { label: "Leaderboard", icon: Trophy, path: "/app/leaderboard" },
       { label: "Organizations", icon: Building2, path: "/app/organizations" },
@@ -47,7 +48,7 @@ export default function Sidebar({ onClose, className = "" }: SidebarProps) {
       { label: "My Tracks", icon: Map, path: "/app/tracks" },
       { label: "My Cohorts", icon: Users, path: "/app/cohorts" },
       { label: "Resources", icon: Library, path: "/app/resources" },
-      { label: "Leaderboard", icon: Trophy, path: "/app/leaderboard" },
+      { label: "Leaderboard", icon: Trophy, path: "/app/leaderboard", badge: "New" },
       ...(user?.studentType === 'independent' ? [{ label: "Wallet", icon: Wallet, path: "/app/wallet" }] : []),
       { label: "Settings", icon: Settings, path: "/app/settings" },
     ],
@@ -82,7 +83,7 @@ export default function Sidebar({ onClose, className = "" }: SidebarProps) {
             <Button
               key={item.label}
               variant="ghost"
-              className={`w-full justify-start gap-3 h-12 rounded-xl transition-all ${
+              className={`w-full justify-start gap-3 h-12 rounded-xl transition-all relative group ${
                 isActive ? "bg-baby text-navy hover:bg-baby shadow-lg shadow-baby/20 font-bold" : "text-white/70 hover:text-white hover:bg-white/5"
               }`}
               onClick={() => {
@@ -92,12 +93,28 @@ export default function Sidebar({ onClose, className = "" }: SidebarProps) {
             >
               <item.icon className={`w-5 h-5 ${isActive ? "text-navy" : "text-white/40 group-hover:text-baby"}`} />
               <span className="text-sm">{item.label}</span>
+              {item.badge && (
+                <span className={`ml-auto px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest ${
+                  isActive ? "bg-navy text-white" : "bg-baby text-navy"
+                }`}>
+                  {item.badge}
+                </span>
+              )}
             </Button>
           );
         })}
       </nav>
 
       <div className="pt-6 border-t border-white/10 mt-auto flex flex-col gap-4">
+        {user?.role === ROLES.ADMIN && (
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 mb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-baby" />
+              <span className="text-[10px] font-bold text-white uppercase tracking-widest">Admin Power</span>
+            </div>
+            <p className="text-[10px] text-white/50 leading-relaxed font-medium">Platform version is up to date.</p>
+          </div>
+        )}
         <Button 
           variant="ghost" 
           onClick={logout}

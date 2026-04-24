@@ -7,6 +7,7 @@ import {
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
+import { Toaster } from "sonner";
 
 // Pages
 import LandingPage from "./pages/landing/LandingPage";
@@ -33,6 +34,7 @@ export default function App() {
   return (
     <Router>
       <AuthProvider>
+        <Toaster position="top-right" expand={false} richColors />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />

@@ -1,105 +1,61 @@
 import * as React from "react";
 import { useState, useEffect, createContext, useContext } from 'react';
-import { auth, db } from '../lib/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc, setDoc, query, where, collection, getDocs } from 'firebase/firestore';
+
+/**
+ * UI-ONLY AUTH MOCKUP
+ * ------------------
+ * This hook simulates authentication to allow you to navigate the UI
+ * and develop pages without a backend.
+ */
 
 const AuthContext = createContext<any>(null);
+
+const STORAGE_KEY = 'trustar_mock_user';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserProfile = async (uid: string, email: string | null) => {
-    try {
-      const userRef = doc(db, 'users', uid);
-      let userSnap = await getDoc(userRef);
-      
-      // If profile doesn't exist, check if there is an ORPHANED profile (pre-created by Admin)
-      if (!userSnap.exists() && email) {
-        // Find profile by email
-        const q = query(collection(db, 'users'), where('email', '==', email.toLowerCase()));
-        const snap = await getDocs(q);
-        
-        if (!snap.empty) {
-          const profileDoc = snap.docs[0];
-          const profileData = profileDoc.data();
-          
-          // Link this UID to the pre-existing profile
-          // IMPORTANT: If the profileDoc ID was 'trustar_admin' or a temporary ID, 
-          // we migrate it to the real UID
-          await setDoc(userRef, {
-            ...profileData,
-            authId: uid, // Track original auth mapping
-            updatedAt: new Date().toISOString()
-          });
-
-          // If the profile was at a dummy ID, delete the dummy
-          if (profileDoc.id !== uid) {
-            // we'll keep it for now or delete it
-          }
-          
-          userSnap = await getDoc(userRef);
-        }
-      }
-
-      if (userSnap.exists()) {
-        return { id: uid, ...userSnap.data() };
-      }
-      return null;
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      return null;
-    }
-  };
-
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setLoading(true);
-      if (firebaseUser) {
-        const profile = await fetchUserProfile(firebaseUser.uid, firebaseUser.email);
-        if (profile) {
-          setUser(profile);
-        } else {
-          setUser({ id: firebaseUser.uid, email: firebaseUser.email, role: 'student' });
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    // Simulate checking session locally
+    const savedUser = localStorage.getItem(STORAGE_KEY);
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    const profile = await fetchUserProfile(result.user.uid, result.user.email);
-    setUser(profile);
-    return profile;
+  const login = async (email: string, _password: string) => {
+    setLoading(true);
+    // Mock login logic - automatically succeeds for anyone
+    // You can customize the mock user object here
+    const mockUser = {
+      id: "mock_id_123",
+      email: email,
+      name: email.split('@')[0],
+      role: email.includes('admin') ? 'admin' : 'student',
+      points: 120,
+      coinBalance: 450,
+      createdAt: new Date().toISOString()
+    };
+    
+    setUser(mockUser);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockUser));
+    setLoading(false);
+    return mockUser;
   };
 
   const logout = async () => {
-    await signOut(auth);
     setUser(null);
-  };
-
-  const register = async (email: string, password: string) => {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    const profile = await fetchUserProfile(result.user.uid, result.user.email);
-    setUser(profile);
-    return profile;
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const signup = async (email: string, password: string) => {
-    return register(email, password);
+    return login(email, password);
   };
 
   const refreshUser = async () => {
-    if (user?.id) {
-      const profile = await fetchUserProfile(user.id, user.email || null);
-      setUser(profile);
-    }
+    // Boilerplate for refreshing state
   };
 
   return (

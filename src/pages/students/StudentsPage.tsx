@@ -36,6 +36,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { toast } from "sonner";
+
 export default function StudentsPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,14 +66,18 @@ export default function StudentsPage() {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await api.createUser(formData);
-      setIsDialogOpen(false);
-      setFormData({ name: "", email: "", password: "password123", role: formData.role, studentType: "independent", parentId: "" });
-      loadData();
-    } catch (err) {
-      console.error(err);
-    }
+    const promise = api.createUser(formData);
+    
+    toast.promise(promise, {
+      loading: 'Creating user account...',
+      success: (data: any) => {
+        setIsDialogOpen(false);
+        setFormData({ name: "", email: "", password: "password123", role: formData.role, studentType: "independent", parentId: "" });
+        loadData();
+        return `Account created for ${data.name}!`;
+      },
+      error: 'Failed to create user. Please try again.',
+    });
   };
 
   const students = users.filter((u: any) => u.role === 'student');

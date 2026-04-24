@@ -134,8 +134,18 @@ export default function CohortDetailPage() {
                   
                   <div className="pt-4 border-t border-surface-3 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-text-secondary">Students</span>
-                      <span className="text-sm font-bold text-navy">{cohort.studentsCount}</span>
+                      <span className="text-xs font-medium text-text-secondary">Enrollment</span>
+                      <div className="text-right">
+                        <span className="text-sm font-bold text-navy">{cohort.studentsCount || 0}</span>
+                        <span className="text-xs text-text-muted"> / {cohort.capacity || 10} students</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-text-secondary">Timeline</span>
+                      <div className="text-right">
+                        <div className="text-[10px] font-bold text-navy uppercase">{cohort.startDate || 'TBA'}</div>
+                        <div className="text-[10px] text-text-muted uppercase">to {cohort.endDate || 'TBA'}</div>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-text-secondary">Delivery</span>

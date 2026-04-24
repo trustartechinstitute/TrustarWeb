@@ -23,6 +23,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 
+import { toast } from "sonner";
+
 export default function SubmissionsPage() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,17 +52,19 @@ export default function SubmissionsPage() {
   const handleGrade = async (status: 'approved' | 'rejected') => {
     if (!selectedSub) return;
     setGrading(true);
-    try {
-      await api.gradeSubmission(selectedSub.id, status, parseInt(points), feedback);
-      // Refresh list
-      setSubmissions(prev => prev.map(s => s.id === selectedSub.id ? { ...s, status, instructorFeedback: feedback, pointsAwarded: parseInt(points) } : s));
-      setSelectedSub(null);
-      setFeedback("");
-    } catch (err) {
-      alert("Grading failed.");
-    } finally {
-      setGrading(false);
-    }
+    const promise = api.gradeSubmission(selectedSub.id, status, parseInt(points), feedback);
+    
+    toast.promise(promise, {
+      loading: 'Saving grade...',
+      success: () => {
+        setSubmissions(prev => prev.map(s => s.id === selectedSub.id ? { ...s, status, instructorFeedback: feedback, pointsAwarded: parseInt(points) } : s));
+        setSelectedSub(null);
+        setFeedback("");
+        return status === 'approved' ? 'Submission approved!' : 'Submission rejected.';
+      },
+      error: 'Failed to grade submission.',
+      finally: () => setGrading(false)
+    });
   };
 
   if (loading) return (
