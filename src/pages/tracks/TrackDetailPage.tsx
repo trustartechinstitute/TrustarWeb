@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/src/components/common/PageHeader";
 import { api } from "@/src/services/api";
 import { Button } from "@/components/ui/button";
-import { BookOpen, ChevronRight, Play, Star, Clock } from "lucide-react";
+import { BookOpen, ChevronRight, Play, Star, Clock, Map as MapIcon } from "lucide-react";
 import { useAuth } from "@/src/hooks/useAuth";
 import { ROLES } from "@/src/utils/constants";
 import { EmptyState } from "@/src/components/common/EmptyState";
@@ -31,7 +31,7 @@ export default function TrackDetailPage() {
   }, [id]);
 
   if (loading) return <div>Loading track details...</div>;
-  if (!track) return <EmptyState title="Track Not Found" description="The track you are looking for does not exist." icon={Map} />;
+  if (!track) return <EmptyState title="Track Not Found" description="The track you are looking for does not exist." icon={MapIcon} />;
 
   return (
     <div className="space-y-8">

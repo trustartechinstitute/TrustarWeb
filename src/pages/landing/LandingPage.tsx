@@ -37,7 +37,13 @@ import {
   Menu,
   Heart,
   Lightbulb,
-  Code
+  Code,
+  Target,
+  MonitorPlay,
+  Trophy,
+  ArrowRight,
+  Laptop,
+  Compass
 } from "lucide-react";
 import { api } from "@/src/services/api";
 import { buildLandingLeadMessage } from "@/src/utils/whatsapp";
@@ -161,9 +167,9 @@ export default function LandingPage() {
                 EDUCATION <br /> THAT <span className="text-baby">BUILDS</span> <br /> INNOVATORS.
               </h1>
               <p className="text-lg sm:text-xl text-text-secondary font-medium max-w-lg mx-auto lg:mx-0 mb-12 leading-relaxed">
-                Live online classes from anywhere. Small cohorts of 4–6 students. Real output every single week. We follow a capability pipeline, not just age.
+                Live online classes from anywhere. Small cohorts of up to 10 students. Real output every single week. We follow a capability pipeline, not just age.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center lg:justify-start">
                 <Button 
                   size="lg" 
                   onClick={() => document.getElementById("leads")?.scrollIntoView({ behavior: 'smooth' })}
@@ -171,14 +177,10 @@ export default function LandingPage() {
                 >
                   Apply Now <ChevronRight className="ml-2 w-5 h-5" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={() => document.getElementById("tracks")?.scrollIntoView({ behavior: 'smooth' })}
-                  className="border-baby text-baby hover:bg-baby/5 font-bold rounded-full px-12 h-16 text-lg"
-                >
-                  Our Tracks
-                </Button>
+                <div className="flex flex-col items-center sm:items-start text-xs font-bold text-text-secondary uppercase tracking-widest mt-2 sm:mt-0">
+                  <span>Take the Passion Test</span>
+                  <span className="text-baby">Only $1 (or equivalent)</span>
+                </div>
               </div>
             </motion.div>
             
@@ -327,6 +329,77 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* How It Works */}
+        <section className="py-24 sm:py-32 bg-white px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16 sm:mb-24">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-baby/10 text-baby font-bold text-xs uppercase tracking-widest rounded-full mb-6">
+                Your Journey
+              </div>
+              <h2 className="text-4xl sm:text-5xl lg:text-7xl font-display font-bold text-navy tracking-tighter leading-none mb-6">HOW IT <span className="text-baby">WORKS</span>.</h2>
+              <p className="text-lg text-text-secondary font-medium max-w-2xl mx-auto">From absolute beginner to confident builder in four stages.</p>
+            </div>
+            
+            <div className="grid md:grid-cols-4 gap-8 relative">
+              <div className="hidden md:block absolute top-[45px] left-0 right-0 h-1 border-t-2 border-dashed border-surface-3 z-0"></div>
+              
+              {[
+                { step: "01", title: "Take the Passion Test", desc: "We evaluate capability and motivation, not just age.", icon: Target },
+                { step: "02", title: "Join a Micro-Cohort", desc: "Get matched with up to 10 global peers sharing your level.", icon: Users },
+                { step: "03", title: "Learn & Build Live", desc: "Interactive online classes focusing on real-world projects.", icon: MonitorPlay },
+                { step: "04", title: "Showcase Output", desc: "Deploy your project and build a professional portfolio.", icon: Trophy }
+              ].map((item, idx) => (
+                <div key={idx} className="relative z-10 flex flex-col items-center text-center">
+                  <div className="w-24 h-24 rounded-full bg-surface border-8 border-white shadow-xl shadow-navy/5 flex items-center justify-center mb-6">
+                    <item.icon className="w-10 h-10 text-baby" />
+                  </div>
+                  <div className="bg-baby text-navy font-black text-sm px-3 py-1 rounded-full mb-4">{item.step}</div>
+                  <h4 className="text-xl font-display font-bold text-navy mb-3">{item.title}</h4>
+                  <p className="text-sm font-medium text-text-secondary">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Showcase */}
+        <section className="py-24 sm:py-32 bg-surface-2 px-4 sm:px-6 border-y border-surface-3">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+              <div>
+                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-navy tracking-tighter leading-none mb-6">REAL STUDENT <br/><span className="text-baby">PROJECTS</span>.</h2>
+                <p className="text-lg text-text-secondary font-medium max-w-xl">We don't do endless theory. Every module ends with a built, working project that students can show to the world.</p>
+              </div>
+              <Button variant="outline" className="border-navy text-navy hover:bg-navy/5 font-bold rounded-full px-8 h-12" onClick={() => document.getElementById("leads")?.scrollIntoView({ behavior: 'smooth' })}>
+                Start Building <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { title: "Interactive Solar System", track: "Explorers", tech: "Scratch", img: "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=1974&auto=format&fit=crop" },
+                { title: "E-Commerce Mockup", track: "Builders", tech: "HTML/CSS/JS", img: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1970&auto=format&fit=crop" },
+                { title: "Expense Tracker App", track: "Engineers", tech: "React & Firebase", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" }
+              ].map((project, idx) => (
+                <div key={idx} className="group rounded-[2rem] overflow-hidden bg-white border border-surface-3 shadow-lg hover:shadow-2xl transition-all duration-500">
+                  <div className="aspect-[4/3] overflow-hidden relative">
+                    <img src={project.img} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/80 to-transparent flex items-end p-6">
+                      <div className="flex gap-2">
+                         <span className="px-2 py-1 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold rounded-lg uppercase tracking-widest">{project.track}</span>
+                         <span className="px-2 py-1 bg-baby text-navy text-[10px] font-bold rounded-lg uppercase tracking-widest">{project.tech}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h4 className="text-xl font-display font-bold text-navy">{project.title}</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* 6. Passion Test */}
         <section id="passion-test" className="py-24 sm:py-32 bg-white px-4 sm:px-6">
           <div className="max-w-7xl mx-auto bg-navy rounded-[2.5rem] sm:rounded-[4rem] p-8 sm:p-12 lg:p-24 text-white relative overflow-hidden">
@@ -342,7 +415,7 @@ export default function LandingPage() {
                      "Not an intelligence test — it's a capability check.",
                      "20–30 minutes, administered online.",
                      "Determines the perfect starting track for you.",
-                     "One-time fee of ₦5,000 (credited to tuition)."
+                     "One-time fee of $1 (or equivalent)."
                    ].map(v => (
                      <div key={v} className="flex items-center gap-4">
                        <div className="w-6 h-6 rounded-full bg-baby/20 flex items-center justify-center"><CheckCircle2 className="w-4 h-4 text-baby" /></div>
@@ -422,6 +495,61 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Why Choose Us */}
+        <section className="py-24 sm:py-32 bg-navy text-white px-4 sm:px-6 relative overflow-hidden">
+           <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 100% 0%, #7eb8f7 0%, transparent 50%)'}}></div>
+           <div className="max-w-7xl mx-auto relative z-10">
+              <div className="text-center mb-16 sm:mb-24">
+                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold tracking-tighter leading-none mb-6">GLOBAL STANDARDS, <br/><span className="text-baby">LOCAL IMPACT</span>.</h2>
+                <p className="text-lg text-white/70 font-medium max-w-2xl mx-auto">Why students from across the globe choose Trustar for their tech education.</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 {[
+                   { title: "Hybrid Learning Engine", desc: "Live classes blended with a self-paced hub of quizzes, assignments, and discussions.", icon: MonitorPlay },
+                   { title: "Micro-Cohorts", desc: "Class sizes strictly capped at 10 students ensuring personalized attention.", icon: Users },
+                   { title: "Output-Driven", desc: "Every module concludes with a functional, deployed piece of technology.", icon: Rocket },
+                   { title: "Global Peer Network", desc: "Learn alongside motivated peers from different countries and cultures.", icon: Globe },
+                   { title: "Dedicated Mentorship", desc: "Separate, dedicated mentorship tracks supporting career goals and portfolio building.", icon: Compass },
+                   { title: "Future-Ready Curriculum", desc: "Syllabus updated quarterly to match industry demands, including AI context.", icon: Laptop }
+                 ].map((feat, idx) => (
+                    <div key={idx} className="bg-white/5 border border-white/10 p-8 rounded-3xl hover:bg-white/10 transition-colors">
+                       <div className="w-12 h-12 rounded-xl bg-baby/20 flex items-center justify-center text-baby mb-6"><feat.icon className="w-6 h-6" /></div>
+                       <h4 className="text-xl font-display font-bold mb-3">{feat.title}</h4>
+                       <p className="text-sm font-medium text-white/60 leading-relaxed">{feat.desc}</p>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-24 sm:py-32 bg-surface-2 px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-5xl font-display font-bold text-navy mb-4 tracking-tighter uppercase">Frequently Asked Questions</h2>
+              <p className="text-text-secondary font-medium tracking-widest text-sm uppercase opacity-80">Everything you need to know.</p>
+            </div>
+            
+            <Accordion className="w-full space-y-4">
+              {[
+                { q: "What equipment does my child need?", a: "A reliable laptop or desktop computer with internet access and a webcam. A quiet place for the live sessions is also highly recommended." },
+                { q: "What if we miss a live class?", a: "All live sessions are recorded and made available to students. Our tutors also provide asynchronous support via our learning platform for any questions." },
+                { q: "Do you accept students from any country?", a: "Yes! Our platform is 100% online, and we organize our micro-cohorts to accommodate different time zones, typically catering to UK, US, European, and African time zones." },
+                { q: "Is prior coding experience required?", a: "Not at all. The Passion Test helps us determine the appropriate starting point, whether they are absolute beginners or have some prior experience." },
+                { q: "What happens after the Passion Test?", a: "Once completed, our team will share a detailed capability report and place the student in the most suitable track and cohort. You will then receive the enrollment details." }
+              ].map((faq, i) => (
+                <AccordionItem key={i} value={`item-${i}`} className="bg-white px-6 py-2 rounded-2xl border border-surface-3 shadow-sm data-[state=open]:border-baby/50 transition-colors">
+                  <AccordionTrigger className="text-left font-display font-bold text-navy hover:text-baby text-lg hover:no-underline [&[data-state=open]]:text-baby">{faq.q}</AccordionTrigger>
+                  <AccordionContent className="text-text-secondary font-medium leading-relaxed pb-4 pt-2">
+                    {faq.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
+
         {/* 11. Lead capture form */}
         <section id="leads" className="py-24 sm:py-32 px-4 sm:px-6 bg-white">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -469,7 +597,7 @@ export default function LandingPage() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Preferred Track</label>
-                        <Select required onValueChange={(val) => setForm({...form, interestedTrack: val})}>
+                        <Select required onValueChange={(val: string) => setForm({...form, interestedTrack: val})}>
                           <SelectTrigger className="rounded-xl h-14 bg-white border-none shadow-sm">
                             <SelectValue placeholder="Select interest" />
                           </SelectTrigger>
